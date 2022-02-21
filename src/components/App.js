@@ -1,4 +1,4 @@
-import _ from  'lodash';
+import _ from 'lodash';
 import React from "react";
 import block from 'bem-cn';
 import moment from "moment";
@@ -12,6 +12,21 @@ const b = block('app');
 moment.locale('ru');
 
 const getRate = (full = 1, value = 0) => parseFloat(((value * 100) / full).toFixed(1));
+const dateFormat = "DD-MM-YYYY";
+const getRoleBackground = role => {
+  switch (role) {
+    case roles.sheriff:
+      return "red lighten-3 grey-text text-darken-4";
+    case roles.citizen:
+      return "red lighten-5 grey-text text-darken-4";
+    case roles.mafia:
+      return "grey lighten-2 grey-text text-darken-4";
+    case roles.don:
+      return "grey grey-text text-lighten-5";
+    default:
+      return "";
+  }
+}
 
 class App extends React.Component {
   stats = {
@@ -34,8 +49,6 @@ class App extends React.Component {
     plrInfo: '',
   }
 
-  info = React.createRef();
-
   constructor(props) {
     super(props);
     const games = this.stats.games;
@@ -51,10 +64,10 @@ class App extends React.Component {
         games.cityWin = _.add(games.cityWin, 1);
         games.cityWinRate = getRate(games.count, games.cityWin);
       }
-      const date = moment(log.date, "DD-MM-YYYY");
+      const date = moment(log.date, dateFormat);
       games.byDays[date.format('d')] = _.add(games.byDays[date.format('d')], 1);
       if (!_.has(meetings.log, date.format('X'))) {
-        _.set(meetings.log, date.format('X'),  []);
+        _.set(meetings.log, date.format('X'), []);
       }
       meetings.log[date.format('X')].push(log);
       meetings.last = date.fromNow();
@@ -87,7 +100,7 @@ class App extends React.Component {
     });
 
     const plrStats = _.reduce(players.list, (result, p, name) => {
-      const r = { ...result };
+      const r = {...result};
       if (p.winRate > r.mostWinRate.value) { // TODO: несколько человек
         r.mostWinRate.name = name;
         r.mostWinRate.value = p.winRate;
@@ -122,14 +135,14 @@ class App extends React.Component {
       }
       return r;
     }, {
-      mostActive: { name: '', value: 0 },
-      lessActive: { name: '', value: 9999999 },
-      mostWinRate: { name: '', value: 0 },
-      mostLoseRate: { name: '', value: 200 },
-      mostMafia: { name: '', value: 0 },
-      mostDon: { name: '', value: 0 },
-      mostCitizen: { name: '', value: 0 },
-      mostSheriff: { name: '', value: 0 },
+      mostActive: {name: '', value: 0},
+      lessActive: {name: '', value: 9999999},
+      mostWinRate: {name: '', value: 0},
+      mostLoseRate: {name: '', value: 200},
+      mostMafia: {name: '', value: 0},
+      mostDon: {name: '', value: 0},
+      mostCitizen: {name: '', value: 0},
+      mostSheriff: {name: '', value: 0},
     });
 
     _.merge(players, plrStats);
@@ -147,159 +160,278 @@ class App extends React.Component {
     });
   }
 
-  onInfoClick = e => {
-    if (e.target === this.info.current) {
-      this.setState({
-        meetingInfo: '',
-        plrInfo: '',
-      })
-    }
-  }
-
   getArchiveBlock = () => {
-    const { meetings } = this.stats;
-
+    const {meetings} = this.stats;
+    const chunks = _.chunk(Object.keys(meetings.log).reverse(), Math.floor(Object.keys(meetings.log).length / 2));
     return (
-      <div className={b('block')}>
-        <strong>Архив</strong>
-        { Object.keys(meetings.log).reverse().map(date => (
-          <div className={b('row', { clickable: true })} key={date} onClick={this.onMeetingClick(date)}>
-            <span>{moment(date, 'X').format('D MMMM YYYY')}</span>
-            <em>{ moment(date, 'X').fromNow() }</em>
+      <div className="card">
+        {this.getMeetingInfo()}
+        <div className="card-content">
+          <span className="card-title">Архив</span>
+          <div className="row">
+            {chunks.map((data, index) => (
+              <div className="col s12 xl6" key={`col-${index}`}>
+                <div className="collection">
+                  {data.map(date => (
+                    <div className="collection-item grey-text text-darken-4 activator" key={date}
+                       onClick={this.onMeetingClick(date)}>
+                      <span className="left activator">{moment(date, 'X').format('D MMMM YYYY')}</span>
+                      <small className="right activator">{moment(date, 'X').fromNow()}</small>
+                      <div style={{clear: "both"}}/>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     );
   }
 
   getPlayersListBlock = () => {
-    const { players } = this.stats;
-    const chunks = _.chunk(Object.keys(players.list).sort(), Object.keys(this.stats.meetings.log).length);
+    const {players} = this.stats;
+    const chunks = _.chunk(Object.keys(players.list).sort(), Math.floor(Object.keys(players.list).length / 3));
     return (
-      <div className={b('block')}>
-        <strong>Игроки</strong>
-        <div className={b('inner-list')}>
-          { chunks.map((data, index) => (
-            <div className={b('col')} style={{ width: `${Math.floor(100 / chunks.length)}%`}} key={`col-${index}`}>
-              { data.map(plr => (
-                <div className={b('row', { clickable: true })} key={plr} onClick={this.onNameClick(plr)}>
-                  <span>{plr}</span><em>{players.list[plr].lastGame}</em>
+      <div className="card">
+        {this.getPlrInfo()}
+        <div className="card-content">
+          <span className="card-title">Список игроков</span>
+          <div className="row">
+            {chunks.map((data, index) => (
+              <div className="col s12 xl4" key={`col-${index}`}>
+                <div className="collection">
+                  {data.map(plr => (
+                    <div className="collection-item grey-text text-darken-4 activator" key={plr}
+                       onClick={this.onNameClick(plr)}>
+                      <span className="left activator">{plr}</span>
+                      <small className="right activator">{players.list[plr].lastGame}</small>
+                      <div style={{clear: "both"}}/>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   getGamesBlock = () => {
-    const { games } = this.stats;
+    const {games} = this.stats;
 
     return (
-      <div className={b('block')}>
-        <strong>Игры</strong>
-        <div className={b('row')}><span>Всего</span><span>{ games.count }</span></div>
-        <div className={b('row')}><span>Побед мафии</span><span>{ games.mafiaWin } ({games.mafiaWinRate}%)</span></div>
-        <div className={b('row')}><span>Побед мирных</span><span>{ games.cityWin } ({games.cityWinRate}%)</span></div>
-        <div className={b('row')}><span>По дням недели</span></div>
-        <div className={b('row', {days: true })}><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div>
-        <div className={b('row', {days: true })}>
-          { [1, 2, 3, 4, 5, 6, 0].map(index => <span key={`game-${index}`}>{_.get(games.byDays, `[${index}]`, '-')}</span>) }
+      <div className="card">
+        <div className="card-content">
+          <span className="card-title">Игры</span>
+          <table>
+            <tbody>
+            <tr>
+              <td>Всего</td>
+              <td className="right-align">{games.count}</td>
+            </tr>
+            <tr>
+              <td>Побед мафии</td>
+              <td className="right-align">{games.mafiaWin} ({games.mafiaWinRate}%)</td>
+            </tr>
+            <tr>
+              <td>Побед мирных</td>
+              <td className="right-align">{games.cityWin} ({games.cityWinRate}%)</td>
+            </tr>
+            <tr>
+              <td colSpan="2">
+                <table className="centered striped">
+                  <tbody>
+                  <tr>
+                    <td>ПН</td>
+                    <td>ВТ</td>
+                    <td>СР</td>
+                    <td>ЧТ</td>
+                    <td>ПТ</td>
+                    <td>СБ</td>
+                    <td>ВС</td>
+                  </tr>
+                  <tr>
+                    {[1, 2, 3, 4, 5, 6, 0].map(index => <td
+                      key={`game-${index}`}>{_.get(games.byDays, `[${index}]`, '-')}</td>)}
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     );
   }
 
   getMeetingsBlock = () => {
-    const { meetings } = this.stats;
+    const {meetings} = this.stats;
 
     return (
-      <div className={b('block')}>
-        <strong>Встречи</strong>
-        <div className={b('row')}><span>Всего</span><span>{ Object.keys(meetings).length }</span></div>
-        <div className={b('row')}><span>Последняя</span><span>{ meetings.last }</span></div>
-        <div className={b('row')}><span>Минимум игр за вечер</span><span>{ meetings.gamesPerMeetingMin }</span></div>
-        <div className={b('row')}><span>Максимум игр за вечер</span><span>{ meetings.gamesPerMeetingMax }</span></div>
-        <div className={b('row')}><span>По дням недели</span></div>
-        <div className={b('row', {days: true })}><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div>
-        <div className={b('row', {days: true })}>
-          { [1, 2, 3, 4, 5, 6, 0].map(index => <span key={`meeting-${index}`}>{_.get(meetings.byDays, `[${index}]`, '-')}</span>) }
+      <div className="card">
+        <div className="card-content">
+          <span className="card-title">Встречи</span>
+          <table>
+            <tbody>
+            <tr>
+              <td>Всего</td>
+              <td className="right-align">{Object.keys(meetings).length}</td>
+            </tr>
+            <tr>
+              <td>Последняя</td>
+              <td className="right-align">{meetings.last}</td>
+            </tr>
+            <tr>
+              <td>Игр за вечер (мин/макс)</td>
+              <td className="right-align">{meetings.gamesPerMeetingMin} / {meetings.gamesPerMeetingMax}</td>
+            </tr>
+            <tr>
+              <td colSpan="2">
+                <table className="centered striped">
+                  <tbody>
+                  <tr>
+                    <td>ПН</td>
+                    <td>ВТ</td>
+                    <td>СР</td>
+                    <td>ЧТ</td>
+                    <td>ПТ</td>
+                    <td>СБ</td>
+                    <td>ВС</td>
+                  </tr>
+                  <tr>
+                    {[1, 2, 3, 4, 5, 6, 0].map(index => <td
+                      key={`meeting-${index}`}>{_.get(meetings.byDays, `[${index}]`, '-')}</td>)}
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     );
   }
 
   getPlayersBlock = () => {
-    const { players } = this.stats;
+    const {players} = this.stats;
 
     return (
-      <div className={b('block')}>
-        <strong>Встречи</strong>
-        <div className={b('row')}><span>Всего</span><span>{ Object.keys(players.list).length }</span></div>
-        <div className={b('row')}><span>Наиболее активный</span><span>{ players.mostActive.name } ({ players.mostActive.value } игр)</span></div>
-        <div className={b('row')}><span>Наимение активный</span><span>{ players.lessActive.name } ({ players.lessActive.value } игр)</span></div>
-        <div className={b('row')}><span>Наивысший винрейт</span><span>{ players.mostWinRate.name } ({ players.mostWinRate.value }%)</span></div>
-        <div className={b('row')}><span>Наинизший винрейт</span><span>{ players.mostLoseRate.name } ({ players.mostLoseRate.value }%)</span></div>
-        <div className={b('row')}><span>Главный мирный</span><span>{ players.mostCitizen.name } ({ players.mostCitizen.value } игр)</span></div>
-        <div className={b('row')}><span>Главный шериф</span><span>{ players.mostSheriff.name } ({ players.mostSheriff.value } игр)</span></div>
-        <div className={b('row')}><span>Главный мафиози</span><span>{ players.mostMafia.name } ({ players.mostMafia.value } игр)</span></div>
-        <div className={b('row')}><span>Главный дон</span><span>{ players.mostDon.name } ({ players.mostDon.value } игр)</span></div>
+      <div className="card">
+        <div className="card-content">
+          <span className="card-title">Игроки</span>
+          <table>
+            <tbody>
+            <tr>
+              <td>Всего</td>
+              <td className="right-align">{Object.keys(players.list).length}</td>
+            </tr>
+            <tr>
+              <td>Наиболее активный</td>
+              <td className="right-align">{players.mostActive.name} ({players.mostActive.value} игр)</td>
+            </tr>
+            <tr>
+              <td>Наимение активный</td>
+              <td className="right-align">{players.lessActive.name} ({players.lessActive.value} игр)</td>
+            </tr>
+            <tr>
+              <td>Наивысший винрейт</td>
+              <td className="right-align">{players.mostWinRate.name} ({players.mostWinRate.value}%)</td>
+            </tr>
+            <tr>
+              <td>Наинизший винрейт</td>
+              <td className="right-align">{players.mostLoseRate.name} ({players.mostLoseRate.value}%)</td>
+            </tr>
+            <tr>
+              <td>Главный мирный</td>
+              <td className="right-align">{players.mostCitizen.name} ({players.mostCitizen.value} игр)</td>
+            </tr>
+            <tr>
+              <td>Главный шериф</td>
+              <td className="right-align">{players.mostSheriff.name} ({players.mostSheriff.value} игр)</td>
+            </tr>
+            <tr>
+              <td>Главный мафиози</td>
+              <td className="right-align">{players.mostMafia.name} ({players.mostMafia.value} игр)</td>
+            </tr>
+            <tr>
+              <td>Главный дон</td>
+              <td className="right-align">{players.mostDon.name} ({players.mostDon.value} игр)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
 
-  getMeetingInfo = date => {
+  getMeetingInfo = () => {
+    const {meetingInfo: date} = this.state;
+    if (!date) {
+      return null;
+    }
     const data = this.stats.meetings.log[date];
-    return data.map((game, index) => (
-      <div className={b('block')} key={`game-${index}`}>
-        <strong>Игра {index + 1} (Победа {game.win === roles.mafia ? 'мафии' : 'мирных'})</strong>
-        { (_.orderBy(game.players, 'name' )).map(plr => (
-          <div className={b('row', { role: plr.role })} key={`plr-${plr.name}`}>
-            <span>{plr.name}</span><span>{ translateRole(plr.role) }</span>
-          </div>
-        ))}
-      </div>
-    ));
-  }
-
-  getPlrInfo = name => {
-    const data = this.stats.players.list[name];
     return (
-      <div className={b('block')}>
-        <strong>{name}</strong>
-        <div className={b('row')}><span>Последняя активность</span><span>{ data.lastGame }</span></div>
-        <div className={b('row')}><span>Всего игр</span><span>{ data.games }</span></div>
-        <div className={b('row')}><span>Побед</span><span>{ data.win } ({data.winRate}%)</span></div>
-        <div className={b('row')}><span>Поражений</span><span>{ data.lose } ({data.loseRate}%)</span></div>
-        <strong>Игр по ролям</strong>
-        { _.map(data.byRoles, (value, role) => (
-          <div className={b('row')} key={role}>
-            <span>{translateRole(role)}</span>
-            <span>{value} ({getRate(data.games, value)}%)</span>
-          </div>
-        ))}
+      <div className="card-reveal">
+          <span className="card-title grey-text text-darken-4">Встреча {moment(date, 'X').format(dateFormat)}<i
+            className="material-icons right">close</i></span>
+        <div className="row">
+          {data.map((game, index) => (
+            <div className="col s12 xl4" key={`game-${index}`}>
+              <div className="collection">
+                <div
+                  className="collection-item grey-text text-darken-4">Игра {index + 1} (Победа {game.win === roles.mafia ? 'мафии' : 'мирных'})
+                </div>
+                {(_.orderBy(game.players, 'name')).map(plr => (
+                  <div className={`collection-item ${getRoleBackground(plr.role)}`} key={`plr-${plr.name}`}>
+                    <span className="left">{plr.name}</span>
+                    <small className="right">{translateRole(plr.role)}</small>
+                    <div style={{clear: "both"}}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
-  getInfo = () => {
-    const {
-      plrInfo,
-      meetingInfo,
-    } = this.state;
-
-    if (!plrInfo && !meetingInfo) {
+  getPlrInfo = () => {
+    const {plrInfo: name} = this.state;
+    if (!name) {
       return null;
     }
-
-    return  (
-      <div className={b('info')} onClick={this.onInfoClick} ref={this.info}>
-        <div className={b('info-content')}>
-          <div className={b("inner-list")}>
-           { plrInfo && this.getPlrInfo(plrInfo) }
-           { meetingInfo && this.getMeetingInfo(meetingInfo) }
-          </div>
+    const data = this.stats.players.list[name];
+    return (
+      <div className="card-reveal">
+          <span className="card-title grey-text text-darken-4">Игрок {name}<i
+            className="material-icons right">close</i></span>
+        <div className="row">
+          <table>
+            <tbody>
+            <tr><td>Последняя активность</td><td className="right-align">{data.lastGame}</td></tr>
+            <tr><td>Всего игр</td><td className="right-align">{data.games}</td></tr>
+            <tr><td>Побед</td><td className="right-align">{data.win} ({data.winRate}%)</td></tr>
+            <tr><td>Поражений</td><td className="right-align">{data.lose} ({data.loseRate}%)</td></tr>
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr><th>Игр по ролям</th></tr>
+            </thead>
+            <tbody>
+            {_.map(data.byRoles, (value, role) => (
+              <tr key={role}>
+                <td>{translateRole(role)}</td>
+                <td className="right-align">{value} ({getRate(data.games, value)}%)</td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
         </div>
       </div>
     )
@@ -307,20 +439,28 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className={b()}>
-        <div className={b('col', { info: true })}>
-          { this.getMeetingsBlock() }
-          { this.getGamesBlock() }
-          { this.getPlayersBlock() }
+      <React.Fragment>
+        <nav>
+          <div className="container">
+            <div className="nav-wrapper">
+              <span className="brand-logo">Мафиозная статистика</span>
+            </div>
+          </div>
+        </nav>
+        <div className="container">
+          <div className="row">
+            <div className="col s12 l6 xl4">
+              {this.getMeetingsBlock()}
+              {this.getGamesBlock()}
+              {this.getPlayersBlock()}
+            </div>
+            <div className="col s12 l6 xl8">
+              {this.getArchiveBlock()}
+              {this.getPlayersListBlock()}
+            </div>
+          </div>
         </div>
-        <div className={b('col', { archive: true })}>
-          { this.getArchiveBlock() }
-        </div>
-        <div className={b('col', { players: true })}>
-          { this.getPlayersListBlock() }
-        </div>
-        { this.getInfo() }
-      </div>
+      </React.Fragment>
     );
   }
 }

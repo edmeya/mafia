@@ -1,4 +1,4 @@
-import { roles } from './statics';
+import {roles} from './statics';
 
 export default [
   {
@@ -3292,6 +3292,230 @@ export default [
       {
         "name": "В поиске",
         "role": roles.sheriff,
+        "win": true
+      }
+    ]
+  },
+  {
+    "date": "11-02-2022",
+    "win": roles.city,
+    "players": [
+      {
+        "name": "Ракета",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Влад",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Сын",
+        "role": roles.mafia,
+        "win": false
+      },
+      {
+        "name": "Аменхотеп",
+        "role": roles.mafia,
+        "win": false
+      },
+      {
+        "name": "Ину",
+        "role": roles.sheriff,
+        "win": true
+      },
+      {
+        "name": "Лирика",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Самса",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Правша",
+        "role": roles.don,
+        "win": false
+      },
+      {
+        "name": "Фил",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Физрук",
+        "role": roles.citizen,
+        "win": true
+      }
+    ]
+  },
+  {
+    "date": "13-07-2021",
+    "win": roles.city,
+    "players": [
+      {
+        "name": "Правша",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Сын",
+        "role": roles.mafia,
+        "win": false
+      },
+      {
+        "name": "Самса",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Ракета",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Физрук",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Лирика",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Онега",
+        "role": roles.mafia,
+        "win": false
+      },
+      {
+        "name": "Иви",
+        "role": roles.citizen,
+        "win": true
+      },
+      {
+        "name": "Аменхотеп",
+        "role": roles.don,
+        "win": false
+      },
+      {
+        "name": "Фил",
+        "role": roles.sheriff,
+        "win": true
+      }
+    ]
+  },
+  {
+    "date": "13-07-2021",
+    "win": roles.mafia,
+    "players": [
+      {
+        "name": "Лирика",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Ракета",
+        "role": roles.don,
+        "win": true
+      },
+      {
+        "name": "Сын",
+        "role": roles.sheriff,
+        "win": false
+      },
+      {
+        "name": "Амура",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Ину",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Иви",
+        "role": roles.mafia,
+        "win": true
+      },
+      {
+        "name": "Фил",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Антек",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Правша",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Онега",
+        "role": roles.mafia,
+        "win": true
+      }
+    ]
+  },
+  {
+    "date": "13-07-2021",
+    "win": roles.mafia,
+    "players": [
+      {
+        "name": "Самса",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Правша",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Амура",
+        "role": roles.sheriff,
+        "win": false
+      },
+      {
+        "name": "Иви",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Аменхотеп",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Сын",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Лирика",
+        "role": roles.citizen,
+        "win": false
+      },
+      {
+        "name": "Фил",
+        "role": roles.don,
+        "win": true
+      },
+      {
+        "name": "Ракета",
+        "role": roles.mafia,
+        "win": true
+      },
+      {
+        "name": "Физрук",
+        "role": roles.mafia,
         "win": true
       }
     ]
