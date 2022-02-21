@@ -3353,7 +3353,7 @@ export default [
     ]
   },
   {
-    "date": "13-07-2021",
+    "date": "11-02-2022",
     "win": roles.city,
     "players": [
       {
@@ -3409,7 +3409,7 @@ export default [
     ]
   },
   {
-    "date": "13-07-2021",
+    "date": "11-02-2022",
     "win": roles.mafia,
     "players": [
       {
@@ -3465,7 +3465,7 @@ export default [
     ]
   },
   {
-    "date": "13-07-2021",
+    "date": "11-02-2022",
     "win": roles.mafia,
     "players": [
       {
